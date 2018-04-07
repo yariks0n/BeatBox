@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import com.droid.ykozh.beatbox.databinding.FragmentBeatBoxBinding;
 import com.droid.ykozh.beatbox.databinding.ListItemSoundBinding;
 
+import java.util.List;
+
 public class BeatBoxFragment extends Fragment {
 
     private BeatBox mBeatBox;
@@ -32,7 +34,7 @@ public class BeatBoxFragment extends Fragment {
 
         binding.recyclerView.setLayoutManager(new GridLayoutManager
                 (getActivity(), 3));
-        binding.recyclerView.setAdapter(new SoundAdapter());
+        binding.recyclerView.setAdapter(new SoundAdapter(mBeatBox.getSounds()));
         return binding.getRoot();
     }
 
@@ -41,10 +43,23 @@ public class BeatBoxFragment extends Fragment {
         private SoundHolder(ListItemSoundBinding binding) {
             super(binding.getRoot());
             mBinding = binding;
+            mBinding.setViewModel(new SoundViewModel(mBeatBox));
+        }
+
+        public void bind(Sound sound) {
+            mBinding.getViewModel().setSound(sound);
+            mBinding.executePendingBindings();
         }
     }
 
     private class SoundAdapter extends RecyclerView.Adapter<SoundHolder> {
+
+        private List<Sound> mSounds;
+
+        public SoundAdapter(List<Sound> sounds) {
+            mSounds = sounds;
+        }
+
         @Override
         public SoundHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
@@ -52,12 +67,16 @@ public class BeatBoxFragment extends Fragment {
                     .inflate(inflater, R.layout.list_item_sound, parent, false);
             return new SoundHolder(binding);
         }
+
         @Override
         public void onBindViewHolder(SoundHolder holder, int position) {
+            Sound sound = mSounds.get(position);
+            holder.bind(sound);
         }
+
         @Override
         public int getItemCount() {
-            return 0;
+            return mSounds.size();
         }
     }
 
